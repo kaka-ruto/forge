@@ -1,0 +1,59 @@
+# Forge OS Development Environment
+FROM golang:1.21-bullseye
+
+# Install Buildroot dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git \
+    wget \
+    cpio \
+    unzip \
+    rsync \
+    bc \
+    libncurses-dev \
+    python3 \
+    python3-dev \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install QEMU for x86_64 and ARM testing
+RUN apt-get update && apt-get install -y \
+    qemu-system-x86 \
+    qemu-system-arm \
+    qemu-system-aarch64 \
+    qemu-user-static \
+    qemu-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install testing and development tools
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    vim \
+    htop \
+    tree \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install gotestsum for better test output
+RUN go install gotest.tools/gotestsum@latest
+
+# Install go-junit-report for CI integration
+RUN go install github.com/jstemmer/go-junit-report@latest
+
+# Install gocov and gocov-html for coverage reporting
+RUN go install github.com/axw/gocov/gocov@latest && \
+    go install github.com/matm/gocov-html@latest
+
+# Set environment variables
+ENV BR2_DL_DIR=/workspace/dl
+ENV BR2_CCACHE_DIR=/workspace/.ccache
+ENV GOPATH=/go
+ENV GOROOT=/usr/local/go
+ENV PATH=$PATH:/go/bin
+
+# Create workspace directory
+RUN mkdir -p /workspace
+WORKDIR /workspace
+
+# Default command
+CMD ["/bin/bash"]

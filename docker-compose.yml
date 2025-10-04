@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  forge-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: forge-dev
+    volumes:
+      - .:/workspace:cached
+      - go-modules:/go/pkg/mod:cached
+      - buildroot-dl:/workspace/dl:cached
+      - buildroot-ccache:/workspace/.ccache:cached
+    working_dir: /workspace
+    environment:
+      - BR2_DL_DIR=/workspace/dl
+      - BR2_CCACHE_DIR=/workspace/.ccache
+      - GOPATH=/go
+      - GOROOT=/usr/local/go
+      - GO111MODULE=on
+      - CGO_ENABLED=1
+    ports:
+      - "8080:8080"  # For web dashboards during testing
+      - "8123:8123"  # For Home Assistant
+      - "3000:3000"  # For development servers
+    stdin_open: true
+    tty: true
+    command: sleep infinity
+
+volumes:
+  go-modules:
+    driver: local
+  buildroot-dl:
+    driver: local
+  buildroot-ccache:
+    driver: local

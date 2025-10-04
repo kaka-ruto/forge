@@ -1,0 +1,79 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (uncomment if using go mod)
+# vendor/
+
+# Go workspace file
+go.work
+
+# Build artifacts
+bin/
+output/
+build/
+dist/
+
+# Cache directories
+.cache/
+.forge/
+
+# Log files
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+
+# Docker volumes
+docker-volumes/
+
+# Buildroot downloads and build directories
+dl/
+buildroot-*/
+output/
+
+# QEMU images and temporary files
+*.img
+*.qcow2
+*.raw
+
+# Test fixtures that shouldn't be committed
+test/fixtures/runtime/
+
+# Coverage reports
+coverage.html
+coverage.txt
+coverage.xml
+
+# Benchmark results
+benchmarks/
+
+# Metrics data
+metrics/

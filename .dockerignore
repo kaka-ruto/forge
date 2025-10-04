@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Examples (can be large)
+examples/
+
+# Test fixtures
+test/fixtures/
+
+# Build artifacts
+bin/
+output/
+build/
+dist/
+*.img
+*.qcow2
+
+# Cache directories
+.cache/
+.forge/
+
+# Log files
+*.log
+logs/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github/
+
+# Temporary files
+tmp/
+temp/
+
+# Coverage and benchmark files
+coverage.*
+benchmarks/
+metrics/
