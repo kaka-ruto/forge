@@ -1,0 +1,27 @@
+schema_version: "1.0"
+name: "{{.ProjectName}}"
+version: "0.1.0"
+architecture: "{{.Architecture}}"
+template: minimal
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "latest"
+
+# Minimal packages - just BusyBox
+packages: []
+
+# No features for minimal
+features: []
+
+# Build configuration
+build:
+  optimization: size
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 256
+    network: user
+    ports: []

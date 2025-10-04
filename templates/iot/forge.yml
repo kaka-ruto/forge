@@ -1,0 +1,36 @@
+schema_version: "1.0"
+name: "{{.ProjectName}}"
+version: "0.1.0"
+architecture: "{{.Architecture}}"
+template: iot
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "latest"
+kernel_config:
+  I2C: "y"
+  SPI: "y"
+  GPIO: "y"
+
+# IoT packages
+packages:
+  - mosquitto
+  - python3
+  - i2c-tools
+  - busybox
+
+# No special features
+features: []
+
+# Build configuration
+build:
+  optimization: size
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 512
+    network: user
+    ports:
+      - "1883:1883"  # MQTT

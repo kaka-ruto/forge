@@ -1,0 +1,55 @@
+schema_version: "1.0"
+name: "{{.ProjectName}}"
+version: "0.1.0"
+architecture: "{{.Architecture}}"
+template: security
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "latest"
+
+# Security-focused packages
+packages:
+  - openssh
+  - openssl
+  - busybox
+  - iptables
+  - fail2ban
+  - rsyslog
+
+# Security features
+features:
+  - ssh-hardening
+  - firewall
+
+# Security configuration
+security:
+  ssh:
+    port: 22
+    permit_root_login: "no"
+    password_authentication: "yes"
+    pubkey_authentication: "yes"
+
+  firewall:
+    default_policy:
+      input: DROP
+      output: ACCEPT
+      forward: DROP
+    rules:
+      - action: accept
+        protocol: tcp
+        port: 22
+        source: "0.0.0.0/0"
+
+# Build configuration
+build:
+  optimization: security
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 512
+    network: user
+    ports:
+      - "2222:22"

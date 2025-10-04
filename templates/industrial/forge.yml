@@ -1,0 +1,66 @@
+schema_version: "1.0"
+name: "{{.ProjectName}}"
+version: "0.1.0"
+architecture: "{{.Architecture}}"
+template: industrial
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "latest-rt"  # Real-time kernel
+
+# Industrial packages
+packages:
+  - openssh
+  - busybox
+  - i2c-tools
+  - spi-tools
+  - gpio-tools
+  - watchdog
+  - rsyslog
+  - chrony  # NTP for time synchronization
+
+# Industrial features
+features:
+  - monitoring
+  - watchdog
+  - real-time
+
+# Real-time configuration
+kernel:
+  config:
+    PREEMPT_RT: y
+    HIGH_RES_TIMERS: y
+
+# Industrial I/O configuration
+industrial:
+  watchdog:
+    device: /dev/watchdog
+    timeout: 60
+
+  gpio:
+    pins:
+      - number: 17
+        direction: out
+        value: 0
+        description: "Status LED"
+
+  i2c:
+    buses:
+      - bus: 1
+        devices:
+          - address: "0x48"
+            driver: "lm75"
+            description: "Temperature sensor"
+
+# Build configuration
+build:
+  optimization: realtime
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 512
+    network: user
+    ports:
+      - "2222:22"

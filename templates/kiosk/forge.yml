@@ -1,0 +1,68 @@
+schema_version: "1.0"
+name: "{{.ProjectName}}"
+version: "0.1.0"
+architecture: "{{.Architecture}}"
+template: kiosk
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "latest"
+
+# Kiosk packages
+packages:
+  - xorg-server
+  - chromium
+  - xterm
+  - openssh
+  - busybox
+  - unclutter  # Hide mouse cursor
+  - x11vnc     # Remote desktop access
+
+# Kiosk features
+features:
+  - kiosk-mode
+  - auto-login
+  - web-dashboard
+
+# Display configuration
+display:
+  resolution: "1920x1080"
+  touchscreen: true
+  hide_cursor: true
+  disable_screensaver: true
+
+# Browser configuration
+browser:
+  homepage: "https://example.com"
+  kiosk_mode: true
+  disable_navigation: true
+  disable_context_menu: true
+  disable_dev_tools: true
+
+# Auto-start configuration
+autostart:
+  - command: "chromium --kiosk --disable-infobars --noerrdialogs --disable-session-crashed-bubble --disable-component-update {{.Browser.Homepage}}"
+    user: "kiosk"
+    delay: 5
+
+# User configuration
+users:
+  - name: "kiosk"
+    password: "kiosk"
+    groups: ["audio", "video", "input"]
+    auto_login: true
+
+# Build configuration
+build:
+  optimization: size
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 1024
+    network: user
+    graphics: true
+    ports:
+      - "5900:5900"  # VNC
+      - "2222:22"

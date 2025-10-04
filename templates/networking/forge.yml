@@ -1,0 +1,62 @@
+schema_version: "1.0"
+name: "{{.ProjectName}}"
+version: "0.1.0"
+architecture: "{{.Architecture}}"
+template: networking
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "latest"
+
+# Networking packages
+packages:
+  - openssh
+  - wpa_supplicant
+  - dhcpcd
+  - busybox
+
+# Network features
+features:
+  - network
+
+# Network configuration
+network:
+  interfaces:
+    - name: eth0
+      type: ethernet
+      dhcp: true
+    - name: wlan0
+      type: wireless
+      mode: ap
+      ssid: "ForgeRouter"
+      security: wpa2
+      password: "changeme123"
+
+  firewall:
+    rules:
+      - action: accept
+        protocol: tcp
+        port: 22
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 80
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 443
+        source: "192.168.1.0/24"
+
+# Build configuration
+build:
+  optimization: size
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 512
+    network: user
+    ports:
+      - "8080:80"
+      - "2222:22"
