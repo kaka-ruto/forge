@@ -23,13 +23,17 @@ func TestMinimalE2ETestSuite(t *testing.T) {
 }
 
 func (s *MinimalE2ETestSuite) SetupTest() {
-	var err error
-	s.tempDir, err = os.MkdirTemp("", "forge-e2e-minimal-*")
-	s.Require().NoError(err)
+	// Use the forge directory as base since commands are restricted to it
+	s.tempDir = "/Users/kaka/Code/go/forge"
 }
 
 func (s *MinimalE2ETestSuite) TearDownTest() {
-	os.RemoveAll(s.tempDir)
+	// Clean up test projects
+	testProjects := []string{"minimal-test", "minimal-x86_64", "minimal-arm", "minimal-aarch64", "minimal-git", "existing-project", "invalid-template", "invalid-arch"}
+	for _, project := range testProjects {
+		projectDir := filepath.Join(s.tempDir, project)
+		os.RemoveAll(projectDir)
+	}
 }
 
 func (s *MinimalE2ETestSuite) TestMinimalTemplateWorkflow() {
@@ -178,7 +182,7 @@ func (s *MinimalE2ETestSuite) TestMinimalTemplateInvalidArchitecture() {
 
 // runForgeCommand runs a forge command with the given arguments
 func runForgeCommand(workingDir string, args ...string) error {
-	// Build the forge binary path
+	// Build the forge binary path - use absolute path
 	forgePath := "/Users/kaka/Code/go/forge/forge"
 
 	// Prepare command
@@ -202,7 +206,7 @@ func runForgeCommand(workingDir string, args ...string) error {
 
 // runForgeCommandWithOutput runs a forge command and returns output even on success
 func runForgeCommandWithOutput(workingDir string, args ...string) (string, error) {
-	// Build the forge binary path
+	// Build the forge binary path - use absolute path
 	forgePath := "/Users/kaka/Code/go/forge/forge"
 
 	// Prepare command
