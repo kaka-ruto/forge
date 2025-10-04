@@ -28,6 +28,7 @@ func main() {
 	rootCmd.AddCommand(cli.NewTestCommand())
 	rootCmd.AddCommand(cli.NewDeployCommand())
 	rootCmd.AddCommand(cli.NewPackagesCommand())
+	rootCmd.AddCommand(cli.NewCICDCommand())
 	rootCmd.AddCommand(cli.NewVersionCommand())
 	rootCmd.AddCommand(cli.NewDoctorCommand())
 

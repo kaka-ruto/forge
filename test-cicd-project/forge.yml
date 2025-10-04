@@ -1,0 +1,13 @@
+schema_version: "1.0"
+name: test-cicd-project
+version: 0.1.0
+architecture: x86_64
+template: minimal
+buildroot:
+    version: stable
+kernel:
+    version: latest
+    config: {}
+packages: []
+features: []
+overlays: {}
