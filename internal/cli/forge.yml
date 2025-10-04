@@ -1,0 +1,15 @@
+schema_version: "1.0"
+name: test-project
+version: 1.0.0
+architecture: x86_64
+template: minimal
+buildroot:
+    version: ""
+kernel:
+    version: ""
+    config: {}
+packages: []
+features:
+    - network
+    - firewall
+overlays: {}
