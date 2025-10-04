@@ -19,7 +19,7 @@ type RemoteDeployer struct {
 // NewRemoteDeployer creates a new remote deployer
 func NewRemoteDeployer() *RemoteDeployer {
 	return &RemoteDeployer{
-		logger: logger.NewLogger(logger.INFO, nil, nil),
+		logger: logger.NewLogger(logger.INFO, os.Stdout, os.Stderr),
 	}
 }
 

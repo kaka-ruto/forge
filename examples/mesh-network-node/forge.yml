@@ -1,0 +1,198 @@
+schema_version: "1.0"
+name: mesh-network-node
+version: "1.0.0"
+architecture: x86_64
+template: networking
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "6.1"
+
+# Mesh networking packages
+packages:
+  - olsrd           # Optimized Link State Routing daemon
+  - batctl          # BATMAN-ADV control tool
+  - alfred          # BATMAN-ADV management tool
+  - asterisk        # VoIP PBX system
+  - samba           # File sharing
+  - avahi-daemon    # Service discovery
+  - openssh         # SSH access
+  - busybox         # Core utilities
+  - iw              # Wireless tools
+  - hostapd         # WiFi access point
+  - dnsmasq         # DHCP and DNS server
+
+# Mesh networking features
+features:
+  - mesh-routing
+  - voip-services
+  - file-sharing
+  - service-discovery
+  - monitoring
+  - ssh-hardening
+  - firewall
+
+# OLSR (Optimized Link State Routing) configuration
+olsr:
+  enabled: true
+  interfaces:
+    - wlan0
+    - wlan1
+    - eth1
+  hna4:
+    - "0.0.0.0 0.0.0.0"  # Default route
+  plugins:
+    - httpinfo
+    - txtinfo
+    - jsoninfo
+
+# BATMAN-ADV configuration
+batman_adv:
+  enabled: true
+  interfaces:
+    - wlan0
+    - wlan1
+  bridge_loop_avoidance: true
+  distributed_arp_table: true
+  fragmentation: true
+  gw_mode: "client"
+  orig_interval: 1000
+  ap_isolation: false
+
+# VoIP configuration
+voip:
+  enabled: true
+  sip_port: 5060
+  rtp_ports: "10000-20000"
+  extensions:
+    - extension: "100"
+      password: "mesh123"
+      context: "mesh"
+    - extension: "101"
+      password: "mesh123"
+      context: "mesh"
+  codecs:
+    - ulaw
+    - alaw
+    - gsm
+
+# File sharing configuration
+file_sharing:
+  enabled: true
+  samba_shares:
+    - name: "mesh-share"
+      path: "/mnt/mesh-share"
+      browseable: yes
+      writable: yes
+      guest_ok: yes
+      public: yes
+  nfs_exports:
+    - path: "/mnt/mesh-share"
+      options: "*(rw,sync,no_subtree_check)"
+
+# Service discovery
+avahi:
+  enabled: true
+  hostname: "mesh-node-%h"
+  domain: "mesh.local"
+  services:
+    - name: "Mesh VoIP"
+      type: "_sip._udp"
+      port: 5060
+    - name: "Mesh File Share"
+      type: "_smb._tcp"
+      port: 445
+
+# Network configuration
+network:
+  interfaces:
+    - name: eth0
+      type: ethernet
+      dhcp: true
+      description: "Internet uplink"
+    - name: wlan0
+      type: wireless
+      mode: adhoc
+      ssid: "MeshNet"
+      channel: 6
+      description: "Primary mesh interface"
+    - name: wlan1
+      type: wireless
+      mode: adhoc
+      ssid: "MeshNet-Backup"
+      channel: 11
+      description: "Secondary mesh interface"
+    - name: bat0
+      type: bridge
+      members:
+        - wlan0
+        - wlan1
+      description: "BATMAN virtual interface"
+
+  firewall:
+    rules:
+      - action: accept
+        protocol: tcp
+        port: 22
+        source: "192.168.0.0/16"
+      - action: accept
+        protocol: udp
+        port: 5060
+        source: "192.168.0.0/16"  # SIP
+      - action: accept
+        protocol: udp
+        port: "10000:20000"
+        source: "192.168.0.0/16"  # RTP
+      - action: accept
+        protocol: tcp
+        port: 445
+        source: "192.168.0.0/16"  # Samba
+      - action: accept
+        protocol: tcp
+        port: 139
+        source: "192.168.0.0/16"  # Samba NetBIOS
+
+# DNS and DHCP for mesh network
+dnsmasq:
+  enabled: true
+  domain: "mesh.local"
+  dhcp_range: "192.168.10.100,192.168.10.200,12h"
+  dhcp_options:
+    - "3,192.168.10.1"    # Gateway
+    - "6,192.168.10.1"    # DNS
+  interface: bat0
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  metrics_port: 9100
+  collect_interval: 30s
+  mesh_metrics: true
+
+# Storage configuration
+storage:
+  mounts:
+    - device: "/dev/sda1"
+      mountpoint: "/mnt/mesh-share"
+      fstype: "ext4"
+      options: "defaults"
+      create: true
+
+# Build configuration
+build:
+  optimization: size
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 1024
+    network: user
+    ports:
+      - "5060:5060"  # SIP
+      - "2222:22"    # SSH
+      - "445:445"    # Samba
+  mesh_test:
+    enabled: true
+    nodes: 3
+    test_duration: 300s

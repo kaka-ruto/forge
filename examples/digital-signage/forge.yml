@@ -1,0 +1,114 @@
+schema_version: "1.0"
+name: digital-signage
+version: "1.0.0"
+architecture: x86_64
+template: kiosk
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "6.1"
+
+# Display and browser packages
+packages:
+  - xorg-server     # X11 display server
+  - chromium        # Web browser
+  - plymouth        # Boot splash screen
+  - xterm           # Terminal emulator
+  - nginx           # Web server for content
+  - openssh         # Remote management
+  - busybox         # Core utilities
+
+# Kiosk features
+features:
+  - auto-updates
+  - remote-management
+  - web-dashboard
+  - monitoring
+  - ssh-hardening
+
+# Display configuration
+display:
+  resolution: "1920x1080"
+  orientation: landscape
+  touchscreen: true
+  disable_blanking: true
+  disable_screensaver: true
+
+# Browser configuration
+browser:
+  kiosk_mode: true
+  url: "http://localhost:8080"
+  disable_navigation: true
+  disable_context_menu: true
+  disable_dev_tools: true
+  auto_refresh: 300  # 5 minutes
+
+# Content management
+content:
+  local_server:
+    port: 8080
+    root_directory: "/var/www/signage"
+  remote_update_url: "https://content.example.com/api/signage"
+  update_interval: 3600  # 1 hour
+
+# Remote management
+remote_management:
+  enabled: true
+  api_port: 8081
+  auth_token: "changeme123"
+  allowed_ips: ["192.168.1.0/24"]
+
+# Network configuration
+network:
+  interfaces:
+    - name: eth0
+      type: ethernet
+      dhcp: true
+    - name: wlan0
+      type: wireless
+      mode: client
+      ssid: "CorporateWiFi"
+      security: wpa2
+
+  firewall:
+    rules:
+      - action: accept
+        protocol: tcp
+        port: 22
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 8080
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 8081
+        source: "192.168.1.0/24"
+
+# Monitoring
+monitoring:
+  enabled: true
+  metrics_port: 9100
+  collect_interval: 60s
+
+# Auto-updates
+auto_updates:
+  enabled: true
+  check_interval: 3600
+  update_window: "02:00-04:00"
+  reboot_after_update: true
+
+# Build configuration
+build:
+  optimization: size
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 2048
+    network: user
+    graphics: true
+    ports:
+      - "8080:8080"  # Content server
+      - "2222:22"    # SSH

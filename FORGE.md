@@ -14,7 +14,10 @@ Your mission is to build "Forge OS" - a complete framework for creating custom e
 
 CRITICAL: You will use Test-Driven Development (TDD) throughout. Write tests FIRST, then implement functionality to make tests pass. Every feature must have comprehensive test coverage before moving to the next feature.
 
-You will follow a three-phase process: Phase 1: Framework Architecture and Test-Driven Generation, Phase 2: Execution and Iterative Debugging with Continuous Testing, Phase 3: Validation and Documentation.
+You will follow a three-phase process:
+Phase 1: Framework Architecture and Test-Driven Generation,
+Phase 2: Execution and Iterative Debugging with Continuous Testing,
+Phase 3: Validation and Documentation.
 
 ═══════════════════════════════════════════════════════════════════
 REAL-WORLD USE CASES - END GOALS

@@ -18,7 +18,7 @@ type USBDeployer struct {
 // NewUSBDeployer creates a new USB deployer
 func NewUSBDeployer() *USBDeployer {
 	return &USBDeployer{
-		logger: logger.NewLogger(logger.INFO, nil, nil),
+		logger: logger.NewLogger(logger.INFO, os.Stdout, os.Stderr),
 	}
 }
 

@@ -1,0 +1,147 @@
+schema_version: "1.0"
+name: security-nvr
+version: "1.0.0"
+architecture: x86_64
+template: security
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "6.1"
+
+# Video and storage packages
+packages:
+  - ffmpeg          # Video processing and streaming
+  - motion          # Motion detection
+  - nginx           # Web server for interface
+  - samba           # Network file sharing
+  - v4l-utils       # Video4Linux utilities
+  - alsa-utils      # Audio support (optional)
+  - sqlite          # Database for recordings
+  - busybox         # Core utilities
+
+# Security features
+features:
+  - web-server
+  - ssh-hardening
+  - firewall
+  - monitoring
+  - auto-updates
+
+# Camera configuration
+cameras:
+  - id: "front-door"
+    url: "rtsp://camera1.local:554/stream"
+    resolution: "1920x1080"
+    fps: 30
+    motion_detection: true
+    recording: true
+  - id: "backyard"
+    url: "rtsp://camera2.local:554/stream"
+    resolution: "1280x720"
+    fps: 15
+    motion_detection: true
+    recording: true
+  - id: "driveway"
+    url: "rtsp://camera3.local:554/stream"
+    resolution: "1920x1080"
+    fps: 30
+    motion_detection: true
+    recording: false  # Continuous recording
+
+# Motion detection settings
+motion:
+  enabled: true
+  sensitivity: 0.8
+  minimum_motion_area: 1000
+  event_gap: 30  # seconds between events
+  pre_capture: 5  # seconds before motion
+  post_capture: 10 # seconds after motion
+
+# Recording configuration
+recording:
+  storage_path: "/var/lib/nvr/recordings"
+  retention_days: 30
+  max_storage_gb: 500
+  format: "mp4"
+  quality: "high"
+  continuous_recording: false
+
+# Web interface
+web_interface:
+  port: 80
+  ssl: false
+  auth_required: true
+  username: "admin"
+  password: "secure123"
+  allow_remote_access: true
+
+# Storage management
+storage:
+  primary_disk: "/dev/sda"
+  raid_level: 1  # Optional RAID 1 for redundancy
+  auto_cleanup: true
+  low_space_threshold: 10  # GB
+
+# Network configuration
+network:
+  interfaces:
+    - name: eth0
+      type: ethernet
+      dhcp: true
+
+  firewall:
+    rules:
+      - action: accept
+        protocol: tcp
+        port: 22
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 80
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 443
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 445
+        source: "192.168.1.0/24"  # Samba
+      - action: accept
+        protocol: tcp
+        port: 554
+        source: "192.168.1.0/24"  # RTSP
+
+# Monitoring
+monitoring:
+  enabled: true
+  metrics_port: 9100
+  collect_interval: 30s
+  alerts:
+    - type: "storage_low"
+      threshold: 10
+      action: "email"
+    - type: "camera_offline"
+      threshold: 300
+      action: "notify"
+
+# Backup configuration
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  destination: "/mnt/backup"
+  retention: 7  # days
+
+# Build configuration
+build:
+  optimization: performance
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 2048
+    network: user
+    ports:
+      - "8080:80"    # Web interface
+      - "2222:22"    # SSH

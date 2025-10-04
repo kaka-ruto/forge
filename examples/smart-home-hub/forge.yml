@@ -1,0 +1,192 @@
+schema_version: "1.0"
+name: smart-home-hub
+version: "1.0.0"
+architecture: arm
+template: iot
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "6.1"
+
+# Smart home and IoT packages
+packages:
+  - home-assistant    # Home automation platform
+  - mosquitto         # MQTT broker
+  - zigbee2mqtt       # Zigbee to MQTT bridge
+  - rhasspy          # Voice assistant
+  - nodejs           # Runtime for various services
+  - python3          # Scripting and automation
+  - bluetooth        # Bluetooth support
+  - alsa-utils       # Audio support
+  - pulseaudio       # Audio server
+  - nginx            # Web server
+  - sqlite           # Database
+  - busybox          # Core utilities
+
+# IoT features
+features:
+  - web-dashboard
+  - auto-updates
+  - monitoring
+  - ssh-hardening
+
+# Home Assistant configuration
+home_assistant:
+  enabled: true
+  port: 8123
+  ssl: false
+  auth_required: true
+  username: "admin"
+  password: "home123"
+  auto_start: true
+
+# MQTT broker configuration
+mqtt:
+  enabled: true
+  port: 1883
+  websocket_port: 8080
+  allow_anonymous: false
+  users:
+    - username: "homeassistant"
+      password: "secure123"
+    - username: "zigbee2mqtt"
+      password: "secure123"
+
+# Zigbee configuration
+zigbee:
+  enabled: true
+  adapter: "cc2652"
+  port: "/dev/ttyACM0"
+  pan_id: "0x1a62"
+  channel: 11
+  network_key: "01:23:45:67:89:ab:cd:ef:01:23:45:67:89:ab:cd:ef"
+
+# Voice assistant configuration
+voice:
+  enabled: true
+  assistant: "rhasspy"
+  wake_word: "hey computer"
+  language: "en"
+  microphone: "default"
+  speaker: "default"
+
+# Device integrations
+integrations:
+  - name: "lights"
+    platform: "zigbee"
+    devices:
+      - name: "Living Room Light"
+        ieee_address: "0x00124b0014c2f1a1"
+      - name: "Kitchen Light"
+        ieee_address: "0x00124b0014c2f1a2"
+  - name: "sensors"
+    platform: "zigbee"
+    devices:
+      - name: "Temperature Sensor"
+        ieee_address: "0x00124b0014c2f1a3"
+        type: "temperature"
+      - name: "Motion Sensor"
+        ieee_address: "0x00124b0014c2f1a4"
+        type: "motion"
+  - name: "switches"
+    platform: "zigbee"
+    devices:
+      - name: "Smart Plug"
+        ieee_address: "0x00124b0014c2f1a5"
+
+# Automation rules
+automations:
+  - name: "Motion Light"
+    trigger:
+      platform: "device"
+      device_id: "motion_sensor_1"
+      type: "motion"
+    action:
+      - service: "light.turn_on"
+        entity_id: "light.living_room"
+  - name: "Good Morning"
+    trigger:
+      platform: "time"
+      at: "07:00:00"
+    action:
+      - service: "light.turn_on"
+        entity_id: "light.kitchen"
+      - service: "media_player.volume_set"
+        entity_id: "media_player.kitchen_speaker"
+        volume_level: 0.5
+
+# Network configuration
+network:
+  interfaces:
+    - name: eth0
+      type: ethernet
+      dhcp: true
+    - name: wlan0
+      type: wireless
+      mode: ap
+      ssid: "SmartHome"
+      security: wpa2
+      password: "smarthome123"
+
+  firewall:
+    rules:
+      - action: accept
+        protocol: tcp
+        port: 22
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 8123
+        source: "192.168.1.0/24"  # Home Assistant
+      - action: accept
+        protocol: tcp
+        port: 1883
+        source: "192.168.1.0/24"  # MQTT
+      - action: accept
+        protocol: tcp
+        port: 8080
+        source: "192.168.1.0/24"  # MQTT WebSocket
+
+# Audio configuration
+audio:
+  enabled: true
+  default_sink: "alsa_output.pci-0000_00_1f.3.analog-stereo"
+  default_source: "alsa_input.pci-0000_00_1f.3.analog-stereo"
+
+# Bluetooth configuration
+bluetooth:
+  enabled: true
+  discoverable: true
+  pairable: true
+  devices:
+    - name: "Smart Speaker"
+      mac: "AA:BB:CC:DD:EE:FF"
+
+# Monitoring
+monitoring:
+  enabled: true
+  metrics_port: 9100
+  collect_interval: 30s
+
+# Backup configuration
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  destination: "/mnt/backup"
+  include_config: true
+  include_database: true
+
+# Build configuration
+build:
+  optimization: size
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 1024
+    network: user
+    ports:
+      - "8123:8123"  # Home Assistant
+      - "1883:1883"  # MQTT
+      - "2222:22"    # SSH

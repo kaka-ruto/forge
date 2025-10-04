@@ -83,6 +83,7 @@ func runDeployCommand(args []string, flags map[string]string) error {
 
 	// Register deployers
 	orchestrator.RegisterDeployer(deploy.TargetUSB, deploy.NewUSBDeployer())
+	orchestrator.RegisterDeployer(deploy.TargetSDCard, deploy.NewSDDeployer())
 	orchestrator.RegisterDeployer(deploy.TargetRemote, deploy.NewRemoteDeployer())
 
 	// Parse deployment target

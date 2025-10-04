@@ -1,0 +1,91 @@
+schema_version: "1.0"
+name: home-router
+version: "1.0.0"
+architecture: x86_64
+template: networking
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "6.1"
+
+# Networking packages for router functionality
+packages:
+  - dnsmasq        # DHCP and DNS server
+  - wireguard      # VPN support
+  - iptables       # Firewall rules
+  - hostapd        # WiFi access point
+  - nginx          # Web server for dashboard
+  - openssh        # SSH access
+  - busybox        # Core utilities
+
+# Router-specific features
+features:
+  - firewall
+  - vpn-gateway
+  - web-dashboard
+  - monitoring
+  - ssh-hardening
+
+# Network configuration
+network:
+  interfaces:
+    - name: eth0
+      type: ethernet
+      dhcp: true
+    - name: wlan0
+      type: wireless
+      mode: ap
+      ssid: "ForgeRouter"
+      security: wpa2
+      password: "changeme123"
+
+  firewall:
+    rules:
+      - action: accept
+        protocol: tcp
+        port: 22
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 80
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 443
+        source: "192.168.1.0/24"
+
+# DNS and DHCP configuration
+dnsmasq:
+  domain: "home.local"
+  dhcp_range: "192.168.1.100,192.168.1.200,12h"
+  dhcp_options:
+    - "3,192.168.1.1"    # Gateway
+    - "6,192.168.1.1"    # DNS
+
+# Web dashboard configuration
+web_dashboard:
+  port: 80
+  ssl: false
+  auth_required: true
+  username: "admin"
+  password: "admin123"
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  metrics_port: 9100
+  collect_interval: 30s
+
+# Build configuration
+build:
+  optimization: size
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 512
+    network: user
+    ports:
+      - "8080:80"    # Web dashboard
+      - "2222:22"    # SSH

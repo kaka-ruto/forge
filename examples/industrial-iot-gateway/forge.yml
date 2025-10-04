@@ -1,0 +1,197 @@
+schema_version: "1.0"
+name: industrial-iot-gateway
+version: "1.0.0"
+architecture: arm
+template: industrial
+
+# Buildroot configuration for industrial use
+buildroot_version: stable
+kernel_version: "6.1"
+
+# Real-time kernel for industrial control
+kernel_config:
+  realtime: true
+  preempt_rt: true
+
+# Industrial protocol packages
+packages:
+  - modbus          # Modbus RTU/TCP protocol support
+  - mosquitto       # MQTT broker
+  - node-red        # Visual programming for IoT
+  - python3         # Scripting and automation
+  - i2c-tools       # I2C bus communication
+  - spi-tools       # SPI bus communication
+  - gpio-tools      # GPIO control
+  - can-utils       # CAN bus support
+  - chrony          # NTP for time synchronization
+  - busybox         # Core utilities
+
+# Industrial features
+features:
+  - auto-updates
+  - monitoring
+  - watchdog
+  - ssh-hardening
+  - firewall
+
+# Modbus configuration
+modbus:
+  enabled: true
+  tcp_port: 502
+  rtu_devices:
+    - port: "/dev/ttyS0"
+      baudrate: 9600
+      parity: "none"
+      stopbits: 1
+    - port: "/dev/ttyS1"
+      baudrate: 19200
+      parity: "even"
+      stopbits: 1
+
+# MQTT broker configuration
+mqtt:
+  enabled: true
+  port: 1883
+  websocket_port: 8080
+  persistence: true
+  allow_anonymous: false
+  users:
+    - username: "gateway"
+      password: "secure123"
+
+# Node-RED configuration
+node_red:
+  enabled: true
+  port: 1880
+  admin_auth:
+    username: "admin"
+    password: "admin123"
+  projects_enabled: true
+
+# Monitoring and telemetry
+monitoring:
+  enabled: true
+  metrics_port: 9100
+  collect_interval: 15s
+  exporters:
+    - prometheus
+    - mqtt
+
+# Watchdog configuration
+watchdog:
+  enabled: true
+  timeout: 30
+  ping_interval: 10
+
+# Network configuration
+network:
+  interfaces:
+    - name: eth0
+      type: ethernet
+      dhcp: true
+    - name: wlan0
+      type: wireless
+      mode: client
+      ssid: "IndustrialNetwork"
+      security: wpa2
+
+  firewall:
+    rules:
+      - action: accept
+        protocol: tcp
+        port: 22
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 1883
+        source: "192.168.1.0/24"  # MQTT
+      - action: accept
+        protocol: tcp
+        port: 1880
+        source: "192.168.1.0/24"  # Node-RED
+      - action: accept
+        protocol: tcp
+        port: 502
+        source: "192.168.1.0/24"  # Modbus TCP
+
+# GPIO configuration for industrial I/O
+gpio:
+  pins:
+    - pin: 17
+      direction: out
+      initial: low
+      description: "Status LED"
+    - pin: 18
+      direction: in
+      pull: up
+      description: "Emergency Stop"
+    - pin: 19
+      direction: in
+      pull: down
+      description: "Sensor Input"
+
+# I2C devices
+i2c:
+  bus: 1
+  devices:
+    - address: "0x48"
+      driver: "lm75"
+      description: "Temperature Sensor"
+    - address: "0x77"
+      driver: "bmp280"
+      description: "Pressure Sensor"
+
+# SPI devices
+spi:
+  bus: 0
+  devices:
+    - chip_select: 0
+      driver: "spidev"
+      description: "ADC Interface"
+
+# CAN bus configuration
+can:
+  interface: can0
+  bitrate: 500000
+  restart_ms: 100
+
+# Data collection configuration
+data_collection:
+  enabled: true
+  interval: 5s
+  sensors:
+    - type: "modbus"
+      slave_id: 1
+      register: 40001
+      format: "float32"
+      name: "Temperature"
+    - type: "i2c"
+      bus: 1
+      address: "0x48"
+      register: 0
+      name: "Ambient Temp"
+    - type: "gpio"
+      pin: 18
+      name: "Emergency State"
+
+# Cloud connectivity (optional)
+cloud:
+  enabled: false
+  provider: aws
+  iot_endpoint: "your-endpoint.amazonaws.com"
+  topic_prefix: "industrial/gateway"
+
+# Build configuration
+build:
+  optimization: realtime
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 1024
+    network: user
+    ports:
+      - "1880:1880"  # Node-RED
+      - "1883:1883"  # MQTT
+      - "2222:22"    # SSH

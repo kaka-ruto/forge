@@ -1,0 +1,169 @@
+schema_version: "1.0"
+name: edge-ai-inference
+version: "1.0.0"
+architecture: aarch64
+template: iot
+
+# Buildroot configuration
+buildroot_version: stable
+kernel_version: "6.1"
+
+# AI/ML and computer vision packages
+packages:
+  - opencv           # Computer vision library
+  - tensorflow-lite  # Edge ML inference
+  - python3          # Scripting and ML development
+  - gstreamer        # Multimedia processing
+  - v4l-utils        # Video4Linux camera support
+  - ffmpeg           # Video processing
+  - numpy            # Scientific computing
+  - pillow           # Image processing
+  - scikit-learn     # Machine learning
+  - tflite-runtime   # TensorFlow Lite runtime
+  - busybox          # Core utilities
+
+# IoT features
+features:
+  - monitoring
+  - auto-updates
+  - ssh-hardening
+
+# Camera configuration
+cameras:
+  - device: "/dev/video0"
+    resolution: "1920x1080"
+    fps: 30
+    format: "MJPEG"
+    name: "Primary Camera"
+  - device: "/dev/video1"
+    resolution: "640x480"
+    fps: 15
+    format: "YUYV"
+    name: "Secondary Camera"
+
+# AI/ML models configuration
+models:
+  - name: "object_detection"
+    framework: "tflite"
+    model_path: "/opt/models/efficientdet_lite0.tflite"
+    labels_path: "/opt/models/coco_labels.txt"
+    input_size: "320x320"
+    threshold: 0.5
+  - name: "face_recognition"
+    framework: "tflite"
+    model_path: "/opt/models/facenet.tflite"
+    labels_path: "/opt/models/face_labels.txt"
+    input_size: "160x160"
+    threshold: 0.8
+
+# Inference pipeline configuration
+inference:
+  enabled: true
+  pipeline:
+    - stage: "capture"
+      camera: "primary"
+      resolution: "640x480"
+      fps: 10
+    - stage: "preprocess"
+      operations: ["resize", "normalize"]
+    - stage: "detect"
+      model: "object_detection"
+      confidence: 0.6
+    - stage: "classify"
+      model: "face_recognition"
+      confidence: 0.8
+    - stage: "output"
+      format: "mqtt"
+      topic: "ai/inference/results"
+
+# Real-time processing
+realtime:
+  enabled: true
+  priority: 80
+  cpu_affinity: "2-3"
+  memory_lock: true
+
+# GPU acceleration (for compatible hardware)
+gpu:
+  enabled: true
+  backend: "opencl"  # or "cuda" for NVIDIA
+  memory_limit: "512M"
+
+# Network configuration
+network:
+  interfaces:
+    - name: eth0
+      type: ethernet
+      dhcp: true
+
+  firewall:
+    rules:
+      - action: accept
+        protocol: tcp
+        port: 22
+        source: "192.168.1.0/24"
+      - action: accept
+        protocol: tcp
+        port: 1883
+        source: "192.168.1.0/24"  # MQTT
+
+# MQTT for results publishing
+mqtt:
+  enabled: true
+  broker: "mqtt.local"
+  port: 1883
+  topic_prefix: "ai/inference"
+  qos: 1
+  retain: false
+
+# Monitoring and metrics
+monitoring:
+  enabled: true
+  metrics_port: 9100
+  collect_interval: 5s
+  custom_metrics:
+    - name: "inference_fps"
+      type: "gauge"
+      description: "Frames per second processed"
+    - name: "detection_count"
+      type: "counter"
+      description: "Objects detected"
+    - name: "processing_latency"
+      type: "histogram"
+      description: "Inference processing time"
+
+# Storage for models and data
+storage:
+  model_path: "/opt/models"
+  data_path: "/var/lib/ai-inference"
+  cache_path: "/tmp/ai-cache"
+  max_cache_size: "1G"
+
+# Development and debugging
+development:
+  enabled: true
+  jupyter_port: 8888
+  api_port: 8080
+  log_level: "info"
+
+# Performance optimization
+optimization:
+  enabled: true
+  quantization: "int8"
+  delegate: "gpu"
+  threads: 4
+  batch_size: 1
+
+# Build configuration
+build:
+  optimization: performance
+  debug: false
+
+# Testing configuration
+testing:
+  qemu:
+    memory: 2048
+    network: user
+    ports:
+      - "8080:8080"  # API
+      - "2222:22"    # SSH
