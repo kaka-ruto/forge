@@ -24,9 +24,14 @@ func main() {
 
 	// Add subcommands
 	rootCmd.AddCommand(cli.NewNewCommand())
+	rootCmd.AddCommand(cli.NewAddCommand())
+	rootCmd.AddCommand(cli.NewListCommand())
 	rootCmd.AddCommand(cli.NewBuildCommand())
 	rootCmd.AddCommand(cli.NewTestCommand())
 	rootCmd.AddCommand(cli.NewDeployCommand())
+	rootCmd.AddCommand(cli.NewLogsCommand())
+	rootCmd.AddCommand(cli.NewDebugCommand())
+	rootCmd.AddCommand(cli.NewCleanCommand())
 	rootCmd.AddCommand(cli.NewPackagesCommand())
 	rootCmd.AddCommand(cli.NewCICDCommand())
 	rootCmd.AddCommand(cli.NewVersionCommand())
