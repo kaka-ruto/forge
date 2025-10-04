@@ -2,7 +2,6 @@ package resources
 
 import (
 	"fmt"
-	"os"
 	"runtime"
 	"syscall"
 	"time"
@@ -250,79 +249,6 @@ func (r *ResourceChecker) GetResourceWarnings() []string {
 	}
 
 	return warnings
-}
-
-// ResourceCleaner handles resource cleanup operations
-type ResourceCleaner struct{}
-
-// NewResourceCleaner creates a new resource cleaner
-func NewResourceCleaner() *ResourceCleaner {
-	return &ResourceCleaner{}
-}
-
-// CleanupDirectory cleans up files in a directory older than the specified age
-func (r *ResourceCleaner) CleanupDirectory(dir string, maxAge time.Duration) (int64, error) {
-	var totalCleaned int64
-
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return 0, err
-	}
-
-	cutoff := time.Now().Add(-maxAge)
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-
-		info, err := entry.Info()
-		if err != nil {
-			continue
-		}
-
-		if info.ModTime().Before(cutoff) {
-			filePath := fmt.Sprintf("%s/%s", dir, entry.Name())
-			size := info.Size()
-
-			if err := os.Remove(filePath); err != nil {
-				continue // Skip files that can't be removed
-			}
-
-			totalCleaned += size
-		}
-	}
-
-	return totalCleaned, nil
-}
-
-// CleanupDirectoryDryRun simulates cleanup without actually removing files
-func (r *ResourceCleaner) CleanupDirectoryDryRun(dir string, maxAge time.Duration) (int64, error) {
-	var totalWouldClean int64
-
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return 0, err
-	}
-
-	cutoff := time.Now().Add(-maxAge)
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-
-		info, err := entry.Info()
-		if err != nil {
-			continue
-		}
-
-		if info.ModTime().Before(cutoff) {
-			totalWouldClean += info.Size()
-		}
-	}
-
-	return totalWouldClean, nil
 }
 
 // ResourceMonitor monitors resource usage during operations
