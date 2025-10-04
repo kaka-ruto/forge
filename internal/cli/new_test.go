@@ -84,7 +84,7 @@ func (s *NewCommandTestSuite) TestNewCommandInvalidTemplate() {
 
 	err := createProjectStructure(projectDir, "invalid-template", "x86_64")
 	s.Error(err)
-	s.Contains(err.Error(), "invalid template")
+	s.Contains(err.Error(), "template 'invalid-template' not found")
 }
 
 func (s *NewCommandTestSuite) TestNewCommandInvalidArchitecture() {

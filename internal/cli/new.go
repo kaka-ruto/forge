@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/sst/forge/internal/templates"
 )
 
 // NewNewCommand creates the new command
@@ -61,50 +62,23 @@ func runNewCommand(args []string, flags map[string]string) error {
 
 // createProjectStructure creates the project directory structure and files
 func createProjectStructure(projectDir, template, arch string) error {
-	// Validate template
-	validTemplates := map[string]bool{
-		"minimal":    true,
-		"networking": true,
-		"iot":        true,
-		"security":   true,
-		"industrial": true,
-		"kiosk":      true,
-	}
-
-	if !validTemplates[template] {
-		return fmt.Errorf("invalid template: %s", template)
-	}
-
-	// Validate architecture
-	validArches := map[string]bool{
-		"x86_64":  true,
-		"arm":     true,
-		"aarch64": true,
-		"mips":    true,
-	}
-
-	if !validArches[arch] {
-		return fmt.Errorf("invalid architecture: %s", arch)
-	}
-
 	// Check if directory already exists
 	if _, err := os.Stat(projectDir); !os.IsNotExist(err) {
 		return fmt.Errorf("directory %s already exists", projectDir)
 	}
 
-	// Create project directory
-	if err := os.MkdirAll(projectDir, 0755); err != nil {
-		return fmt.Errorf("failed to create project directory: %v", err)
+	// Use template manager to create project
+	tm := templates.NewTemplateManager()
+
+	// Prepare template data
+	data := map[string]interface{}{
+		"ProjectName":  filepath.Base(projectDir),
+		"Architecture": arch,
 	}
 
-	// Create forge.yml
-	if err := createForgeYml(projectDir, template, arch); err != nil {
-		return fmt.Errorf("failed to create forge.yml: %v", err)
-	}
-
-	// Create README.md
-	if err := createReadme(projectDir, template); err != nil {
-		return fmt.Errorf("failed to create README.md: %v", err)
+	// Apply template
+	if err := tm.ApplyTemplate(template, projectDir, data); err != nil {
+		return fmt.Errorf("failed to apply template: %v", err)
 	}
 
 	// Create .gitignore
@@ -116,69 +90,6 @@ func createProjectStructure(projectDir, template, arch string) error {
 	// TODO: Implement git initialization
 
 	return nil
-}
-
-// createForgeYml creates the forge.yml configuration file
-func createForgeYml(projectDir, template, arch string) error {
-	forgeYmlPath := filepath.Join(projectDir, "forge.yml")
-
-	content := fmt.Sprintf(`schema_version: "1.0"
-name: "%s"
-version: "0.1.0"
-architecture: "%s"
-template: "%s"
-
-buildroot:
-  version: "stable"
-
-kernel:
-  version: "latest"
-
-packages: []
-
-features: []
-
-overlays: {}
-`, filepath.Base(projectDir), arch, template)
-
-	return os.WriteFile(forgeYmlPath, []byte(content), 0644)
-}
-
-// createReadme creates the README.md file
-func createReadme(projectDir, template string) error {
-	readmePath := filepath.Join(projectDir, "README.md")
-
-	content := fmt.Sprintf(`# %s
-
-This is a Forge OS project created with the %s template.
-
-## Getting Started
-
-1. Build the project:
-   `+"```bash"+`
-   forge build
-   `+"```"+`
-
-2. Test in QEMU:
-   `+"```bash"+`
-   forge test
-   `+"```"+`
-
-3. Deploy to target:
-   `+"```bash"+`
-   forge deploy usb --device /dev/sdb
-   `+"```"+`
-
-## Configuration
-
-Edit `+"`forge.yml`"+` to customize your OS configuration.
-
-## Documentation
-
-For more information, visit: https://forge-os.dev
-`, filepath.Base(projectDir), template)
-
-	return os.WriteFile(readmePath, []byte(content), 0644)
 }
 
 // createGitignore creates the .gitignore file

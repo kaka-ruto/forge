@@ -1,0 +1,28 @@
+# Build artifacts
+*.img
+*.qcow2
+*.raw
+*.iso
+build/
+output/
+dl/
+.ccache/
+.cache/
+
+# Logs
+*.log
+.forge/logs/
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

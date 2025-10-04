@@ -1,0 +1,17 @@
+schema_version: "1.0"
+name: "template-test"
+version: "0.1.0"
+architecture: "aarch64"
+template: "iot"
+
+buildroot:
+  version: "stable"
+
+kernel:
+  version: "latest"
+
+packages: []
+
+features: []
+
+overlays: {}
